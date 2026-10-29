@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d2424">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Вільна піраміда</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="root">
+  <canvas id="cv"></canvas>
+
+  <div id="topbar">
+    <button id="btnMenu" class="iconbtn" aria-label="Меню"><span></span><span></span><span></span></button>
+    <div class="player" id="p1"><div class="name"></div><div class="dots"></div></div>
+    <div class="player" id="p2"><div class="name"></div><div class="dots"></div></div>
+  </div>
+  <button id="btnSpin" aria-label="Гвинт"><span class="spinball"><i></i></span></button>
+  <div id="toast"></div>
+
+  <!-- Головне меню -->
+  <div class="overlay" id="menu">
+    <div class="card">
+      <h1>Вільна піраміда</h1>
+      <p class="sub">Російський більярд</p>
+      <button class="big" id="btnBot">Грати проти бота</button>
+      <div class="levels">
+        <button data-level="0">Легкий</button>
+        <button data-level="1" class="on">Середній</button>
+        <button data-level="2">Сильний</button>
+      </div>
+      <button class="big" id="btnFriend">Грати з другом</button>
+      <button class="big ghost" id="btnRules">Правила</button>
+    </div>
+  </div>
+
+  <!-- Пауза -->
+  <div class="overlay hidden" id="pause">
+    <div class="card">
+      <h2>Пауза</h2>
+      <button class="big" id="btnResume">Продовжити</button>
+      <button class="big" id="btnRestart">Почати заново</button>
+      <button class="big ghost" id="btnRules2">Правила</button>
+      <button class="big ghost" id="btnToMenu">Головне меню</button>
+    </div>
+  </div>
+
+  <!-- Правила -->
+  <div class="overlay hidden" id="rules">
+    <div class="card wide">
+      <h2>Правила «Вільної піраміди»</h2>
+      <div class="rules-text">
+        <ul>
+          <li>Грають 16 кулями: 15 білих і червона.</li>
+          <li><b>Розбій</b> — червоною кулею «з руки» з дому (зона ліворуч від лінії) по піраміді.</li>
+          <li>Після розбою можна бити <b>будь-якою кулею по будь-якій кулі</b>. Куля, якою б'єш, вибирається дотиком.</li>
+          <li>Зараховується <b>будь-яка забита куля</b> — і прицільна, і та, якою били («свояк»). Забив — б'єш ще раз, промахнувся — хід суперника.</li>
+          <li>Перемагає той, хто першим забив <b>8 куль</b>.</li>
+          <li><b>Фол</b>: куля-биток не торкнулась жодної кулі, або після зіткнення жодна куля не торкнулась борту і не впала в лузу.
+            Кулі, забиті при фолі, повертаються на стіл. Суперник <b>вибирає будь-яку кулю на столі й забирає її собі</b> (штраф) і б'є далі.</li>
+        </ul>
+        <h3>Керування</h3>
+        <ul>
+          <li><b>Приціл</b>: торкнись або веди пальцем по столу. Точне наведення — колесо праворуч (або коліщатко миші, стрілки ← →).</li>
+          <li><b>Сила удару</b>: потягни кий на смузі ліворуч униз і відпусти (або затисни Пробіл).</li>
+          <li><b>Гвинт</b>: кнопка з кулею ліворуч угорі.</li>
+          <li>На розбої червону кулю можна перетягнути в межах дому.</li>
+        </ul>
+      </div>
+      <button class="big" id="btnRulesClose">Зрозуміло</button>
+    </div>
+  </div>
+
+  <!-- Гвинт -->
+  <div class="overlay hidden" id="spinPanel">
+    <div class="card">
+      <h2>Гвинт</h2>
+      <div id="spinPad"><i></i></div>
+      <p class="sub">Вище — накат, нижче — відтяжка, боки — бічний гвинт</p>
+      <div class="row">
+        <button class="big ghost" id="btnSpinReset">Скинути</button>
+        <button class="big" id="btnSpinOk">Готово</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Кінець гри -->
+  <div class="overlay hidden" id="over">
+    <div class="card">
+      <h2 id="overTitle"></h2>
+      <p class="sub" id="overScore"></p>
+      <button class="big" id="btnAgain">Ще раз</button>
+      <button class="big ghost" id="btnOverMenu">Головне меню</button>
+    </div>
+  </div>
+</div>
+<script src="js/game.js"></script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
