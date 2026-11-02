@@ -1,5 +1,5 @@
 // Спочатку мережа (щоб оновлення гри приходили одразу), без мережі — кеш
-const CACHE = 'pyramid-v7';
+const CACHE = 'pyramid-v8';
 const FILES = ['./', 'index.html', 'style.css', 'js/game.js', 'manifest.json', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

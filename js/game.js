@@ -17,11 +17,12 @@
   // ================== Фізичні параметри ==================
   const GRAV = 9810;                 // мм/с²
   const MU_SLIDE = 0.2;              // тертя ковзання куля–сукно
-  const MU_ROLL = 0.01;              // опір коченню по сукну — куля рівномірно сповільнюється
-  const K_DRAG = 0.15;               // додаткові втрати на великій швидкості (ворс сукна)
+  const MU_ROLL = 0.007;             // опір коченню по сукну — куля рівномірно сповільнюється
+  const K_DRAG = 0.105;              // додаткові втрати на великій швидкості (ворс сукна)
   const SPIN_DECAY = 25;             // гальмування бічного гвинта, рад/с²
   const MU_CUSH = 0.18, MU_BALL = 0.06;
   const E_BALL = 0.93, E_CUSH = 0.78;
+  const CUSH_BOOST = Math.sqrt(1.3);  // борти на 30% пружніші: віддають на 30% більше енергії
   const DT = 1 / 720;
   const VMIN = 200, VMAX = 7500;     // швидкість удару, мм/с
   const DROP = 0.45 * R;             // наскільки центр кулі має зайти за створ, щоб упасти
@@ -143,7 +144,7 @@
     const vn = b.vx * nx + b.vy * ny;
     if (vn >= 0) return 0;
     const s = CUSH_H, c = Math.sqrt(1 - s * s);
-    const e = Math.max(0.6, E_CUSH + 0.04 - 0.00004 * -vn); // сильніший удар — більше втрат
+    const e = Math.min(0.95, Math.max(0.6, E_CUSH + 0.04 - 0.00004 * -vn) * CUSH_BOOST); // сильніший удар — більше втрат
     const Jh = (1 + e) * -vn;          // горизонтальна складова імпульсу борту
     const Jn = Jh / c;                 // повний імпульс уздовж лінії дотик→центр
     b.vx += nx * Jh; b.vy += ny * Jh;  // через центр кулі — без крутного моменту
@@ -1142,17 +1143,27 @@
     if (!G.breakShot) {
       const hit = ballAt(f);
       if (hit >= 0 && hit !== G.cue) {
-        drags.set(e.pointerId, { type: 'select', ball: hit, x: p.x, y: p.y });
+        drags.set(e.pointerId, { type: 'select', ball: hit, x: p.x, y: p.y, a: fingerAngle(f) });
         return;
       }
     }
-    drags.set(e.pointerId, { type: 'aim' });
-    aimAt(f);
+    // дотик сам по собі приціл не змінює — лише проведення пальцем
+    drags.set(e.pointerId, { type: 'swipe', x: p.x, y: p.y, a: fingerAngle(f) });
   });
 
-  function aimAt(f) {
+  function fingerAngle(f) {
     const c = G.balls[G.cue];
-    if (Math.hypot(f.x - c.x, f.y - c.y) > R * 0.5) G.angle = Math.atan2(f.y - c.y, f.x - c.x);
+    return Math.hypot(f.x - c.x, f.y - c.y) > R ? Math.atan2(f.y - c.y, f.x - c.x) : null;
+  }
+  // Проведення обертає кий навколо битка на кут, який палець описав відносно нього (без стрибків)
+  function aimDrag(d, f) {
+    const a = fingerAngle(f);
+    if (a !== null && d.a !== null) {
+      let da = a - d.a;
+      if (da > Math.PI) da -= 2 * Math.PI; else if (da < -Math.PI) da += 2 * Math.PI;
+      G.angle += da;
+    }
+    d.a = a;
   }
 
   cv.addEventListener('pointermove', e => {
@@ -1171,9 +1182,11 @@
       const nx = Math.max(R, Math.min(KITCHEN_X, f.x + d.dx)), ny = Math.max(R, Math.min(WD - R, f.y + d.dy));
       if (freeAt(nx, ny, G.cue)) { b.x = nx; b.y = ny; }
     } else if (d.type === 'select') {
-      if (Math.hypot(p.x - d.x, p.y - d.y) > 10) { d.type = 'aim'; aimAt(toField(p)); }
+      if (Math.hypot(p.x - d.x, p.y - d.y) > 10) { d.type = 'aim'; aimDrag(d, toField(p)); }
+    } else if (d.type === 'swipe') {
+      if (Math.hypot(p.x - d.x, p.y - d.y) > 6) { d.type = 'aim'; aimDrag(d, toField(p)); }
     } else if (d.type === 'aim') {
-      aimAt(toField(p));
+      aimDrag(d, toField(p));
     }
   });
 
